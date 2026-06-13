@@ -16,21 +16,28 @@ public class Transaction {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long transactionId;
 
+    // Custom Transaction Reference
+    private String transactionReference;
+
     @ManyToOne
-    @JoinColumn(name="account_id")
+    @JoinColumn(name = "account_id")
     private Account account;
 
-    private String transactionType; // DEPOSIT, WITHDRAW, TRANSFER
+    private String transactionType;
 
     private Double amount;
 
     private Double balanceAfterTransaction;
 
+    // SUCCESS / FAILED / PENDING
+    private String status;
+
+    // CASH DEPOSIT / UPI / TRANSFER etc.
+    private String remarks;
+
     private LocalDateTime transactionDate;
     
-    private String remarks;            // Salary, Rent, UPI, Transfer
-    private String status;             // SUCCESS, FAILED, PENDING
-    private String mode;               // CASH, UPI, NEFT, IMPS, RTGS
+ // getters setters
 
 	public Long getTransactionId() {
 		return transactionId;
@@ -38,6 +45,14 @@ public class Transaction {
 
 	public void setTransactionId(Long transactionId) {
 		this.transactionId = transactionId;
+	}
+
+	public String getTransactionReference() {
+		return transactionReference;
+	}
+
+	public void setTransactionReference(String transactionReference) {
+		this.transactionReference = transactionReference;
 	}
 
 	public Account getAccount() {
@@ -72,6 +87,22 @@ public class Transaction {
 		this.balanceAfterTransaction = balanceAfterTransaction;
 	}
 
+	public String getStatus() {
+		return status;
+	}
+
+	public void setStatus(String status) {
+		this.status = status;
+	}
+
+	public String getRemarks() {
+		return remarks;
+	}
+
+	public void setRemarks(String remarks) {
+		this.remarks = remarks;
+	}
+
 	public LocalDateTime getTransactionDate() {
 		return transactionDate;
 	}
@@ -79,4 +110,5 @@ public class Transaction {
 	public void setTransactionDate(LocalDateTime transactionDate) {
 		this.transactionDate = transactionDate;
 	}
+
 }
