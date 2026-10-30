@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.demo.Repositories.NotificationRepository;
+import com.example.demo.dto.response.ApiResponse;
 import com.example.demo.entity.Notification;
 
 @RestController
@@ -19,12 +20,7 @@ public class NotificationController {
     private NotificationRepository notificationRepository;
 
     @GetMapping("/customer/{id}")
-    public List<Notification> getCustomerNotifications(
-            @PathVariable Long id){
-
-        return notificationRepository
-                .findByCustomerCustomerId(id);
-
+    public ApiResponse<List<Notification>> getCustomerNotifications(@PathVariable Long id) {
+        return ApiResponse.success(notificationRepository.findByCustomerCustomerId(id));
     }
-
 }

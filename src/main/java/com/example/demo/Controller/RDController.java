@@ -1,15 +1,20 @@
 package com.example.demo.Controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
+
+import com.example.demo.Repositories.CustomerRepository;
 import com.example.demo.Services.RDService;
+import com.example.demo.dto.request.RDRequest;
+import com.example.demo.dto.response.ApiResponse;
+import com.example.demo.entity.Customer;
+import com.example.demo.entity.RecurringDeposit;
+import com.example.demo.exception.ResourceNotFoundException;
+
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/admin/rd")
@@ -18,54 +23,38 @@ public class RDController {
     @Autowired
     private RDService rdService;
 
+    @Autowired
+    private CustomerRepository customerRepository;
+
+    @PreAuthorize("hasAnyRole('CUSTOMER_SERVICE_EXECUTIVE','BRANCH_MANAGER','ADMIN','SUPER_ADMIN')")
     @PostMapping("/create")
-    public String create(@RequestBody RD rd){
+    public ApiResponse<RecurringDeposit> create(@Valid @RequestBody RDRequest request) {
 
-        try{
+        Customer customer = customerRepository.findById(request.getCustomerId())
+                .orElseThrow(() -> new ResourceNotFoundException("Customer", request.getCustomerId()));
 
-            rdService.createRD(rd);
+        RecurringDeposit rd = new RecurringDeposit();
+        rd.setCustomer(customer);
+        rd.setMonthlyDeposit(request.getMonthlyDeposit());
+        rd.setInterestRate(request.getInterestRate());
+        rd.setTenureMonths(request.getTenureMonths());
 
-            return "RD Created";
-
-        }catch(Exception e){
-
-            return e.getMessage();
-
-        }
-
+        return ApiResponse.success("Recurring Deposit created successfully", rdService.createRD(rd, request.getAccountId()));
     }
 
     @GetMapping("/all")
-    public List<RD> getAll(){
-
-        return rdService.getAll();
-
+    public ApiResponse<List<RecurringDeposit>> getAll() {
+        return ApiResponse.success(rdService.getAll());
     }
 
     @GetMapping("/customer/{id}")
-    public List<RD> getCustomer(
-            @PathVariable Long id){
-
-        return rdService.getCustomerRD(id);
-
+    public ApiResponse<List<RecurringDeposit>> getCustomer(@PathVariable Long id) {
+        return ApiResponse.success(rdService.getCustomerRD(id));
     }
 
+    @PreAuthorize("hasAnyRole('CUSTOMER_SERVICE_EXECUTIVE','BRANCH_MANAGER','ADMIN','SUPER_ADMIN')")
     @PutMapping("/close/{id}")
-    public String close(
-            @PathVariable Long id){
-
-        try{
-
-            rdService.close(id);
-
-            return "RD Closed";
-
-        }catch(Exception e){
-
-            return e.getMessage();
-
-        }
-
+    public ApiResponse<RecurringDeposit> close(@PathVariable Long id) {
+        return ApiResponse.success("Recurring Deposit closed and maturity amount credited", rdService.close(id));
     }
-
 }

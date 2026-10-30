@@ -1,6 +1,5 @@
 package com.example.demo.entity;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import jakarta.persistence.Entity;
@@ -18,16 +17,41 @@ public class FixedDeposit {
     private Long fdId;
 
     @ManyToOne
-    @JoinColumn(name = "account_id")
-    private Account account;
+    @JoinColumn(name = "customer_id")
+    private Customer customer;
 
-    private double amount;
-    private double interestRate;
+    // The account the principal + interest is paid into when this FD matures or is closed
+    // early. Must belong to the same customer - enforced in FDService.
+    @ManyToOne
+    @JoinColumn(name = "beneficiary_account_id")
+    private Account beneficiaryAccount;
 
-    private LocalDate startDate;
-    private LocalDate maturityDate;
+    private Double principalAmount;
+    private Double interestRate;
+    private Integer tenureMonths;
+    private Double maturityAmount;
 
+    // ACTIVE / MATURED / CLOSED
     private String status;
 
-    private LocalDateTime createdAt;
+    private LocalDateTime startDate;
+
+    public Long getFdId() { return fdId; }
+    public void setFdId(Long fdId) { this.fdId = fdId; }
+    public Customer getCustomer() { return customer; }
+    public void setCustomer(Customer customer) { this.customer = customer; }
+    public Account getBeneficiaryAccount() { return beneficiaryAccount; }
+    public void setBeneficiaryAccount(Account beneficiaryAccount) { this.beneficiaryAccount = beneficiaryAccount; }
+    public Double getPrincipalAmount() { return principalAmount; }
+    public void setPrincipalAmount(Double principalAmount) { this.principalAmount = principalAmount; }
+    public Double getInterestRate() { return interestRate; }
+    public void setInterestRate(Double interestRate) { this.interestRate = interestRate; }
+    public Integer getTenureMonths() { return tenureMonths; }
+    public void setTenureMonths(Integer tenureMonths) { this.tenureMonths = tenureMonths; }
+    public Double getMaturityAmount() { return maturityAmount; }
+    public void setMaturityAmount(Double maturityAmount) { this.maturityAmount = maturityAmount; }
+    public String getStatus() { return status; }
+    public void setStatus(String status) { this.status = status; }
+    public LocalDateTime getStartDate() { return startDate; }
+    public void setStartDate(LocalDateTime startDate) { this.startDate = startDate; }
 }

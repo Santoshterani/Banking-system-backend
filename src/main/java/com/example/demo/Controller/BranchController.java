@@ -3,17 +3,15 @@ package com.example.demo.Controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
 
 import com.example.demo.Services.BranchService;
+import com.example.demo.dto.request.BranchRequest;
+import com.example.demo.dto.response.ApiResponse;
 import com.example.demo.entity.Branch;
+
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/admin/branch")
@@ -22,50 +20,40 @@ public class BranchController {
     @Autowired
     private BranchService branchService;
 
+    @PreAuthorize("hasAnyRole('ADMIN','SUPER_ADMIN')")
     @PostMapping("/create")
-    public Branch create(
-            @RequestBody Branch branch) {
-    	System.out.println("entered branch controller post");
-
-        return branchService
-                .createBranch(branch);
+    public ApiResponse<Branch> create(@Valid @RequestBody BranchRequest request) {
+        Branch branch = new Branch();
+        branch.setName(request.getName());
+        branch.setAddress(request.getAddress());
+        branch.setIfscCode(request.getIfscCode());
+        return ApiResponse.success("Branch created successfully", branchService.createBranch(branch));
     }
 
     @GetMapping("/all")
-    public List<Branch> all() {
-
-        return branchService.getAllBranches();
+    public ApiResponse<List<Branch>> all() {
+        return ApiResponse.success(branchService.getAllBranches());
     }
 
     @GetMapping("/{id}")
-    public Branch get(
-            @PathVariable Long id) {
-
-        return branchService
-                .getBranch(id);
+    public ApiResponse<Branch> get(@PathVariable Long id) {
+        return ApiResponse.success(branchService.getBranch(id));
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN','SUPER_ADMIN')")
     @PutMapping("/update/{id}")
-    public Branch update(
-            @PathVariable Long id,
-            @RequestBody Branch branch) {
-
-        return branchService
-                .updateBranch(id, branch);
+    public ApiResponse<Branch> update(@PathVariable Long id, @Valid @RequestBody BranchRequest request) {
+        Branch update = new Branch();
+        update.setName(request.getName());
+        update.setAddress(request.getAddress());
+        update.setIfscCode(request.getIfscCode());
+        return ApiResponse.success("Branch updated successfully", branchService.updateBranch(id, update));
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN','SUPER_ADMIN')")
     @DeleteMapping("/delete/{id}")
-    public String delete(
-            @PathVariable Long id) {
-
+    public ApiResponse<Void> delete(@PathVariable Long id) {
         branchService.deleteBranch(id);
-
-        return "Branch Deleted";
-    }
-    
-    @GetMapping("/test")
-    public String test() {
-    	System.out.println("entered branch controller test");
-        return "Working";
+        return ApiResponse.success("Branch deleted successfully", null);
     }
 }
